@@ -1,0 +1,24 @@
+{
+  "name": "tele-static-site-generator",
+  "version": "1.0.0",
+  "description": "The Tele Static Site Generator is a friendly markdown driven content maker for simple sites and blogs.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ab7/tele-static-site-generator.git"
+  },
+  "keywords": [
+    "static",
+    "site",
+    "generator"
+  ],
+  "author": "Alex Baker",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ab7/tele-static-site-generator/issues"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.16.0",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^2.3.2"
+  }
+}
