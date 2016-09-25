@@ -1,7 +1,9 @@
-var gulp = require('gulp');
-var sass = require('gulp-sass');
-var browserSync = require('browser-sync').create();
+const gulp = require('gulp');
+const sass = require('gulp-sass');
+const nunjucks = require('gulp-nunjucks');
+const markdown = require('gulp-markdown');
+const browserSync = require('browser-sync').create();
 
-gulp.task('dev', function() {
+gulp.task('default', function() {
   // Stuff here
 });
