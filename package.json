@@ -20,9 +20,11 @@
     "browser-sync": "^2.16.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.0",
     "gulp-markdown": "^1.2.0",
     "gulp-nunjucks-render": "^2.0.0",
     "gulp-rev": "^7.1.2",
-    "gulp-sass": "^2.3.2"
+    "gulp-sass": "^2.3.2",
+    "gulp-uglify": "^2.0.0"
   }
 }
