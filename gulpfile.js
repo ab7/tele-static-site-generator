@@ -11,6 +11,7 @@ const gulp = require('gulp'),
         'templates': 'src/templates/**/*.html',
         'pages': 'src/pages/**/*.html',
         'posts': 'src/posts/**/*.md',
+        'assets': 'src/assets/',
         'sass': 'src/assets/scss/**/*.scss',
         'js': 'src/assets/js/**/*.js'
       },
@@ -31,21 +32,25 @@ gulp.task('sass', ['clean'], function () {
   return gulp.src(srcPaths.sass)
     .pipe(sass(options).on('error', sass.logError))
     .pipe(rev())
-    .pipe(gulp.dest(buildPaths.assets));
+    .pipe(gulp.dest(buildPaths.assets))
+    .pipe(rev.manifest('css-manifest.json'))
+    .pipe(gulp.dest(buildPaths.assets));;
 });
 
-gulp.task('js', ['clean'], function () {
+gulp.task('js', ['clean', 'sass'], function () {
   return gulp.src(srcPaths.js)
     .pipe(concat('main.js'))
     .pipe(uglify())
     .pipe(rev())
+    .pipe(gulp.dest(buildPaths.assets))
+    .pipe(rev.manifest('js-manifest.json'))
     .pipe(gulp.dest(buildPaths.assets));
 });
 
-gulp.task('compile-templates', ['clean'], function() {
+gulp.task('compile-templates', ['clean', 'js'], function() {
   return gulp.src(srcPaths.pages)
     .pipe(nunjucksRender())
-    .pipe(gulp.dest(buildPaths.root))
+    .pipe(gulp.dest(buildPaths.root));
 });
 
-gulp.task('default', ['compile-templates', 'sass', 'js']);
+gulp.task('default', ['compile-templates']);
