@@ -14,11 +14,13 @@ const gulp = require('gulp'),
         'posts': 'src/posts/**/*.md',
         'assets': 'src/assets/',
         'sass': 'src/assets/scss/**/*.scss',
-        'js': 'src/assets/js/**/*.js'
+        'js': 'src/assets/js/**/*.js',
+        'images': 'src/assets/images/'
       },
       buildPaths = {
         'root': 'build/',
-        'assets': 'build/assets/'
+        'assets': 'build/assets/',
+        'images': 'build/assets/images/'
       };
 
 gulp.task('clean', function () {
@@ -48,7 +50,17 @@ gulp.task('js', ['clean', 'sass'], function () {
     .pipe(gulp.dest(buildPaths.assets));
 });
 
-gulp.task('compile-templates', ['clean', 'js'], function() {
+gulp.task('images', ['clean', 'js'], function () {
+  return gulp.src(srcPaths.images +'*.{png,gif,jpg}')
+  .pipe(gulp.dest(buildPaths.images));
+});
+
+gulp.task('favicon', ['clean'], function () {
+  return gulp.src(srcPaths.images + 'favicon.ico')
+  .pipe(gulp.dest(buildPaths.root));
+});
+
+gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
   jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
   cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
   data = {
