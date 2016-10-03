@@ -7,6 +7,7 @@ const gulp = require('gulp'),
       concat = require('gulp-concat'),
       uglify = require('gulp-uglify'),
       browserSync = require('browser-sync').create(),
+      fs = require('fs'),
       srcPaths  = {
         'templates': 'src/templates/**/*.html',
         'pages': 'src/pages/**/*.html',
@@ -48,8 +49,14 @@ gulp.task('js', ['clean', 'sass'], function () {
 });
 
 gulp.task('compile-templates', ['clean', 'js'], function() {
+  jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
+  cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
+  data = {
+    jsFile: 'assets/' + jsManifest['main.js'],
+    cssFile: 'assets/' + cssManifest['main.css']
+  }
   return gulp.src(srcPaths.pages)
-    .pipe(nunjucksRender())
+    .pipe(nunjucksRender({data: data}))
     .pipe(gulp.dest(buildPaths.root));
 });
 
