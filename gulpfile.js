@@ -7,6 +7,7 @@ const gulp = require('gulp'),
       concat = require('gulp-concat'),
       uglify = require('gulp-uglify'),
       browserSync = require('browser-sync').create(),
+      sourcemaps = require('gulp-sourcemaps'),
       fs = require('fs'),
       srcPaths  = {
         'templates': 'src/templates/**/*.html',
@@ -33,8 +34,10 @@ gulp.task('sass', ['clean'], function () {
     outputStyle: 'compressed'
   };
   return gulp.src(srcPaths.sass)
+    .pipe(sourcemaps.init())
     .pipe(sass(options).on('error', sass.logError))
     .pipe(rev())
+    .pipe(sourcemaps.write('.', {includeContent: true}))
     .pipe(gulp.dest(buildPaths.assets))
     .pipe(rev.manifest('css-manifest.json'))
     .pipe(gulp.dest(buildPaths.assets));;
@@ -42,9 +45,11 @@ gulp.task('sass', ['clean'], function () {
 
 gulp.task('js', ['clean', 'sass'], function () {
   return gulp.src(srcPaths.js)
+    .pipe(sourcemaps.init())
     .pipe(concat('main.js'))
     .pipe(uglify())
     .pipe(rev())
+    .pipe(sourcemaps.write('.', {includeContent: true}))
     .pipe(gulp.dest(buildPaths.assets))
     .pipe(rev.manifest('js-manifest.json'))
     .pipe(gulp.dest(buildPaths.assets));
