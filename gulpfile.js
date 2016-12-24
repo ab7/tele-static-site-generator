@@ -9,6 +9,7 @@ const gulp = require('gulp'),
       browserSync = require('browser-sync').create(),
       sourcemaps = require('gulp-sourcemaps'),
       fs = require('fs'),
+      gap = require('gulp-append-prepend'),
       srcPaths  = {
         'templates': 'src/templates/**/*.html',
         'pages': 'src/pages/**/*.html',
@@ -77,4 +78,19 @@ gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
     .pipe(gulp.dest(buildPaths.root));
 });
 
-gulp.task('default', ['compile-templates']);
+gulp.task('compile-posts', ['clean', 'images', 'favicon'], function() {
+  jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
+  cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
+  data = {
+    jsFile: 'assets/' + jsManifest['main.js'],
+    cssFile: 'assets/' + cssManifest['main.css']
+  }
+  return gulp.src(srcPaths.posts)
+    .pipe(markdown())
+    .pipe(gap.prependText('{% extends "src/templates/base.html" %}{% block content %}'))
+    .pipe(gap.appendText('{% endblock %}'))
+    .pipe(nunjucksRender({data: data}))
+    .pipe(gulp.dest(buildPaths.root));
+});
+
+gulp.task('default', ['compile-templates', 'compile-posts']);
