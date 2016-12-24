@@ -13,6 +13,7 @@ const gulp = require('gulp'),
       srcPaths  = {
         'templates': 'src/templates/**/*.html',
         'pages': 'src/pages/**/*.html',
+        'postsDir': 'src/posts/',
         'posts': 'src/posts/**/*.md',
         'assets': 'src/assets/',
         'sass': 'src/assets/scss/**/*.scss',
@@ -33,6 +34,40 @@ function getAssetFileNames() {
     cssFile: 'assets/' + cssManifest['main.css']
   }
   return data;
+}
+
+function getPostData() {
+  var postData = [];
+
+  fs.readdir(srcPaths.postsDir , function(err, files) {
+    if (err) {
+        console.error('Could not list the directory.', err);
+        process.exit(1);
+    }
+
+    files.forEach(function(file, index) {
+      fs.readFile(srcPaths.postsDir + file, 'utf-8', function (err, content) {
+        if (err) {
+          console.error(err);
+          process.exit(1);
+        }
+        var postText = content.substring(content.lastIndexOf('<!--//') + 1, content.lastIndexOf('//-->'));
+        var lines = postText.split('\n');
+        var postObj = {};
+        for (var i = 0; i < lines.length; i++) {
+          if (lines[i]) {
+            var data = lines[i].split(':');
+            postObj[data[0]] = data[1];
+          }
+        }
+        filename = file.split('.')[0];
+        postObj.slug = filename + '.html';
+        postData.push(postObj);
+      });
+    });
+  });
+
+  return postData;
 }
 
 gulp.task('clean', function () {
@@ -78,6 +113,7 @@ gulp.task('favicon', ['clean'], function () {
 
 gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
   data = getAssetFileNames();
+  data.posts = getPostData();
   return gulp.src(srcPaths.pages)
     .pipe(nunjucksRender({data: data}))
     .pipe(gulp.dest(buildPaths.root));
