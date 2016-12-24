@@ -12,6 +12,7 @@ const gulp = require('gulp'),
       gap = require('gulp-append-prepend'),
       srcPaths  = {
         'templates': 'src/templates/**/*.html',
+        'pagesDir': 'src/pages/',
         'pages': 'src/pages/**/*.html',
         'postsDir': 'src/posts/',
         'posts': 'src/posts/**/*.md',
@@ -29,11 +30,10 @@ const gulp = require('gulp'),
 function getAssetFileNames() {
   var jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
   var cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
-  data = {
+  return {
     jsFile: 'assets/' + jsManifest['main.js'],
     cssFile: 'assets/' + cssManifest['main.css']
   }
-  return data;
 }
 
 function getPostData() {
@@ -68,6 +68,40 @@ function getPostData() {
   });
 
   return postData;
+}
+
+function getNavLinks() {
+  var navLinks = [];
+
+  fs.readdir(srcPaths.pagesDir , function(err, files) {
+    if (err) {
+        console.error('Could not list the directory.', err);
+        process.exit(1);
+    }
+
+    files.forEach(function(file, index) {
+      navObj = {};
+
+      if (file === 'index.html') {
+        navLinks.push({title: 'Home', link: file});
+        return;
+      }
+
+      navObj.title = toTitleCase(file.split('.')[0]);
+      navObj.link = file;
+
+      navLinks.push(navObj);
+    });
+  });
+
+  return navLinks;
+}
+
+function toTitleCase(str) {
+  // per http://stackoverflow.com/a/196991
+  return str.replace(/\w\S*/g, function(txt){
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
 }
 
 gulp.task('clean', function () {
@@ -112,7 +146,9 @@ gulp.task('favicon', ['clean'], function () {
 });
 
 gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
-  data = getAssetFileNames();
+  data = {};
+  data.assets = getAssetFileNames();
+  data.navLinks = getNavLinks();
   data.posts = getPostData();
   return gulp.src(srcPaths.pages)
     .pipe(nunjucksRender({data: data}))
@@ -120,7 +156,9 @@ gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
 });
 
 gulp.task('compile-posts', ['clean', 'images', 'favicon'], function() {
-  data = getAssetFileNames();
+  data = {};
+  data.assets = getAssetFileNames();
+  data.navLinks = getNavLinks();
   return gulp.src(srcPaths.posts)
     .pipe(markdown())
     .pipe(gap.prependText('{% extends "src/templates/base.html" %}{% block content %}'))

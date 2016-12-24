@@ -3,10 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Tele Static Site Generator</title>
-  <link rel="stylesheet" href="{{cssFile}}">
+  <link rel="stylesheet" href="{{assets.cssFile}}">
 </head>
 <body>
-  {% block content %}{% endblock %}
-  <script src="{{jsFile}}"></script>
+  <header>
+    <a href="index.html">
+      <img src="assets/images/tele-logo.png" alt="Tele Static Site Generator">
+    </a>
+  </header>
+  <nav>
+    {% for navLink in navLinks %}
+      <a href="{{navLink.link}}">{{navLink.title}}</a>
+    {% endfor %}
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <a href="https://github.com/ab7/tele-static-site-generator">Github</a>
+  </footer>
+  <script src="{{assets.jsFile}}"></script>
 </body>
 </html>
