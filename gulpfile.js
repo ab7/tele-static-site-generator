@@ -25,6 +25,16 @@ const gulp = require('gulp'),
         'images': 'build/assets/images/'
       };
 
+function getAssetFileNames() {
+  var jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
+  var cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
+  data = {
+    jsFile: 'assets/' + jsManifest['main.js'],
+    cssFile: 'assets/' + cssManifest['main.css']
+  }
+  return data;
+}
+
 gulp.task('clean', function () {
   return gulp.src(buildPaths.root, {read: false})
     .pipe(clean());
@@ -67,24 +77,14 @@ gulp.task('favicon', ['clean'], function () {
 });
 
 gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
-  jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
-  cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
-  data = {
-    jsFile: 'assets/' + jsManifest['main.js'],
-    cssFile: 'assets/' + cssManifest['main.css']
-  }
+  data = getAssetFileNames();
   return gulp.src(srcPaths.pages)
     .pipe(nunjucksRender({data: data}))
     .pipe(gulp.dest(buildPaths.root));
 });
 
 gulp.task('compile-posts', ['clean', 'images', 'favicon'], function() {
-  jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
-  cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
-  data = {
-    jsFile: 'assets/' + jsManifest['main.js'],
-    cssFile: 'assets/' + cssManifest['main.css']
-  }
+  data = getAssetFileNames();
   return gulp.src(srcPaths.posts)
     .pipe(markdown())
     .pipe(gap.prependText('{% extends "src/templates/base.html" %}{% block content %}'))
