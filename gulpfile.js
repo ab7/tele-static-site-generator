@@ -11,6 +11,7 @@ const gulp = require('gulp'),
       fs = require('fs'),
       gap = require('gulp-append-prepend'),
       srcPaths  = {
+        'root': 'src/',
         'templates': 'src/templates/**/*.html',
         'pagesDir': 'src/pages/',
         'pages': 'src/pages/**/*.html',
@@ -137,12 +138,12 @@ gulp.task('js', ['clean', 'sass'], function () {
 
 gulp.task('images', ['clean', 'js'], function () {
   return gulp.src(srcPaths.images +'*.{png,gif,jpg}')
-  .pipe(gulp.dest(buildPaths.images));
+    .pipe(gulp.dest(buildPaths.images));
 });
 
 gulp.task('favicon', ['clean'], function () {
   return gulp.src(srcPaths.images + 'favicon.ico')
-  .pipe(gulp.dest(buildPaths.root));
+    .pipe(gulp.dest(buildPaths.root));
 });
 
 gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
@@ -167,4 +168,8 @@ gulp.task('compile-posts', ['clean', 'images', 'favicon'], function() {
     .pipe(gulp.dest(buildPaths.root));
 });
 
-gulp.task('default', ['compile-templates', 'compile-posts']);
+gulp.task('watch', function() {
+  gulp.watch(srcPaths.root + '**/*', ['build']);
+});
+
+gulp.task('build', ['compile-templates', 'compile-posts']);
