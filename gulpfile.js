@@ -11,6 +11,7 @@ const gulp = require('gulp'),
       fs = require('fs'),
       gap = require('gulp-append-prepend'),
       htmlmin = require('gulp-htmlmin'),
+      cleanCSS = require('gulp-clean-css'),
       srcPaths  = {
         'root': 'src/',
         'templates': 'src/templates/**/*.html',
@@ -116,12 +117,9 @@ gulp.task('build-clean', function () {
 });
 
 gulp.task('build-sass', ['build-clean'], function () {
-  var options = {
-    outputStyle: 'compressed'
-  };
   return gulp.src(srcPaths.sass)
     .pipe(sourcemaps.init())
-    .pipe(sass(options).on('error', sass.logError))
+    .pipe(sass().on('error', sass.logError))
     .pipe(sourcemaps.write('.', {includeContent: true}))
     .pipe(gulp.dest(buildPaths.assets))
 });
@@ -175,6 +173,7 @@ gulp.task('dist-clean', function () {
 
 gulp.task('dist-css', ['dist-clean'], function() {
   return gulp.src(buildPaths.assets + '**/*.css')
+    .pipe(cleanCSS())
     .pipe(rev())
     .pipe(gulp.dest(distPaths.assets));
 });
