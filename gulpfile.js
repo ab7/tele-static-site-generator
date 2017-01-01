@@ -31,7 +31,7 @@ const gulp = require('gulp'),
       distPaths = {
         'root': 'dist/',
         'assets': 'dist/assets/',
-        'images': 'dist/assests/images'
+        'images': 'dist/assets/images'
       };
 
 //
@@ -168,7 +168,43 @@ gulp.task('build-posts', ['build-clean', 'build-images', 'build-favicon'], funct
 // Dist tasks
 // -------------------------------------------------------------
 
+gulp.task('dist-clean', function () {
+  return gulp.src(distPaths.root + '*', {read: false})
+    .pipe(clean());
+});
 
+gulp.task('dist-css', ['dist-clean'], function() {
+  return gulp.src(buildPaths.assets + '**/*.css')
+    .pipe(rev())
+    .pipe(gulp.dest(distPaths.assets));
+});
+
+gulp.task('dist-js', ['dist-clean'], function() {
+  return gulp.src(buildPaths.assets + '**/*.js')
+    .pipe(uglify())
+    .pipe(rev())
+    .pipe(gulp.dest(distPaths.assets));
+});
+
+gulp.task('dist-images', ['dist-clean', 'dist-js'], function () {
+  return gulp.src(buildPaths.images +'*.{png,gif,jpg}')
+    .pipe(gulp.dest(distPaths.images));
+});
+
+gulp.task('dist-favicon', ['dist-clean'], function () {
+  return gulp.src(buildPaths.root + 'favicon.ico')
+    .pipe(gulp.dest(distPaths.root));
+});
+
+gulp.task('dist-html', ['dist-clean', 'dist-css', 'dist-js'], function() {
+  var options = {
+    collapseWhitespace: true,
+    removeComments: true
+  }
+  return gulp.src(buildPaths.root + '*.html')
+    .pipe(htmlmin(options))
+    .pipe(gulp.dest(distPaths.root));
+});
 
 //
 // Main tasks
@@ -180,4 +216,4 @@ gulp.task('watch', function() {
 
 gulp.task('build', ['build-templates', 'build-posts']);
 
-gulp.task('dist', ['dist-html', 'dist-css']);
+gulp.task('dist', ['dist-html', 'dist-favicon', 'dist-images']);
