@@ -10,6 +10,7 @@ const gulp = require('gulp'),
       sourcemaps = require('gulp-sourcemaps'),
       fs = require('fs'),
       gap = require('gulp-append-prepend'),
+      htmlmin = require('gulp-htmlmin'),
       srcPaths  = {
         'root': 'src/',
         'templates': 'src/templates/**/*.html',
@@ -26,16 +27,16 @@ const gulp = require('gulp'),
         'root': 'build/',
         'assets': 'build/assets/',
         'images': 'build/assets/images/'
+      },
+      distPaths = {
+        'root': 'dist/',
+        'assets': 'dist/assets/',
+        'images': 'dist/assests/images'
       };
 
-function getAssetFileNames() {
-  var jsManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'js-manifest.json', 'utf8'));
-  var cssManifest = JSON.parse(fs.readFileSync(buildPaths.assets + 'css-manifest.json', 'utf8'));
-  return {
-    jsFile: 'assets/' + jsManifest['main.js'],
-    cssFile: 'assets/' + cssManifest['main.css']
-  }
-}
+//
+// Post functions
+// -------------------------------------------------------------
 
 function getPostData() {
   var postData = [];
@@ -105,50 +106,46 @@ function toTitleCase(str) {
   });
 }
 
-gulp.task('clean', function () {
+//
+// Build tasks
+// -------------------------------------------------------------
+
+gulp.task('build-clean', function () {
   return gulp.src(buildPaths.root + '*', {read: false})
     .pipe(clean());
 });
 
-gulp.task('sass', ['clean'], function () {
+gulp.task('build-sass', ['build-clean'], function () {
   var options = {
     outputStyle: 'compressed'
   };
   return gulp.src(srcPaths.sass)
     .pipe(sourcemaps.init())
     .pipe(sass(options).on('error', sass.logError))
-    .pipe(rev())
     .pipe(sourcemaps.write('.', {includeContent: true}))
     .pipe(gulp.dest(buildPaths.assets))
-    .pipe(rev.manifest('css-manifest.json'))
-    .pipe(gulp.dest(buildPaths.assets));;
 });
 
-gulp.task('js', ['clean', 'sass'], function () {
+gulp.task('build-js', ['build-clean', 'build-sass'], function () {
   return gulp.src(srcPaths.js)
     .pipe(sourcemaps.init())
     .pipe(concat('main.js'))
-    .pipe(uglify())
-    .pipe(rev())
     .pipe(sourcemaps.write('.', {includeContent: true}))
     .pipe(gulp.dest(buildPaths.assets))
-    .pipe(rev.manifest('js-manifest.json'))
-    .pipe(gulp.dest(buildPaths.assets));
 });
 
-gulp.task('images', ['clean', 'js'], function () {
+gulp.task('build-images', ['build-clean', 'build-js'], function () {
   return gulp.src(srcPaths.images +'*.{png,gif,jpg}')
     .pipe(gulp.dest(buildPaths.images));
 });
 
-gulp.task('favicon', ['clean'], function () {
+gulp.task('build-favicon', ['build-clean'], function () {
   return gulp.src(srcPaths.images + 'favicon.ico')
     .pipe(gulp.dest(buildPaths.root));
 });
 
-gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
-  data = {};
-  data.assets = getAssetFileNames();
+gulp.task('build-templates', ['build-clean', 'build-images', 'build-favicon'], function() {
+  var data = {};
   data.navLinks = getNavLinks();
   data.posts = getPostData();
   return gulp.src(srcPaths.pages)
@@ -156,9 +153,8 @@ gulp.task('compile-templates', ['clean', 'images', 'favicon'], function() {
     .pipe(gulp.dest(buildPaths.root));
 });
 
-gulp.task('compile-posts', ['clean', 'images', 'favicon'], function() {
-  data = {};
-  data.assets = getAssetFileNames();
+gulp.task('build-posts', ['build-clean', 'build-images', 'build-favicon'], function() {
+  var data = {};
   data.navLinks = getNavLinks();
   return gulp.src(srcPaths.posts)
     .pipe(markdown())
@@ -168,8 +164,20 @@ gulp.task('compile-posts', ['clean', 'images', 'favicon'], function() {
     .pipe(gulp.dest(buildPaths.root));
 });
 
+//
+// Dist tasks
+// -------------------------------------------------------------
+
+
+
+//
+// Main tasks
+// -------------------------------------------------------------
+
 gulp.task('watch', function() {
   gulp.watch(srcPaths.root + '**/*', ['build']);
 });
 
-gulp.task('build', ['compile-templates', 'compile-posts']);
+gulp.task('build', ['build-templates', 'build-posts']);
+
+gulp.task('dist', ['dist-html', 'dist-css']);

@@ -22,6 +22,7 @@
     "gulp-append-prepend": "^1.0.3",
     "gulp-clean": "^0.3.2",
     "gulp-concat": "^2.6.0",
+    "gulp-htmlmin": "^3.0.0",
     "gulp-markdown": "^1.2.0",
     "gulp-nunjucks-render": "^2.0.0",
     "gulp-rev": "^7.1.2",
