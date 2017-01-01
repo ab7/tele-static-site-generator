@@ -106,7 +106,7 @@ function toTitleCase(str) {
 }
 
 gulp.task('clean', function () {
-  return gulp.src(buildPaths.root, {read: false})
+  return gulp.src(buildPaths.root + '*', {read: false})
     .pipe(clean());
 });
 
