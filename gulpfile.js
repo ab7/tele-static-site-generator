@@ -12,6 +12,7 @@ const gulp = require('gulp'),
       gap = require('gulp-append-prepend'),
       htmlmin = require('gulp-htmlmin'),
       cleanCSS = require('gulp-clean-css'),
+      replace = require('gulp-replace'),
       srcPaths  = {
         'root': 'src/',
         'templates': 'src/templates/**/*.html',
@@ -36,8 +37,17 @@ const gulp = require('gulp'),
       };
 
 //
-// Post functions
+// Lib functions
 // -------------------------------------------------------------
+
+function getAssetFileNames() {
+  var jsManifest = JSON.parse(fs.readFileSync(distPaths.assets + 'js-manifest.json', 'utf8'));
+  var cssManifest = JSON.parse(fs.readFileSync(distPaths.assets + 'css-manifest.json', 'utf8'));
+  return {
+    jsFile: jsManifest['main.js'],
+    cssFile: cssManifest['main.css']
+  }
+}
 
 function getPostData() {
   var postData = [];
@@ -175,6 +185,8 @@ gulp.task('dist-css', ['dist-clean'], function() {
   return gulp.src(buildPaths.assets + '**/*.css')
     .pipe(cleanCSS())
     .pipe(rev())
+    .pipe(gulp.dest(distPaths.assets))
+    .pipe(rev.manifest('css-manifest.json'))
     .pipe(gulp.dest(distPaths.assets));
 });
 
@@ -182,6 +194,8 @@ gulp.task('dist-js', ['dist-clean'], function() {
   return gulp.src(buildPaths.assets + '**/*.js')
     .pipe(uglify())
     .pipe(rev())
+    .pipe(gulp.dest(distPaths.assets))
+    .pipe(rev.manifest('js-manifest.json'))
     .pipe(gulp.dest(distPaths.assets));
 });
 
@@ -199,8 +213,11 @@ gulp.task('dist-html', ['dist-clean', 'dist-css', 'dist-js'], function() {
   var options = {
     collapseWhitespace: true,
     removeComments: true
-  }
+  },
+      assets = getAssetFileNames();
   return gulp.src(buildPaths.root + '*.html')
+    .pipe(replace('main.js', assets.jsFile))
+    .pipe(replace('main.css', assets.cssFile))
     .pipe(htmlmin(options))
     .pipe(gulp.dest(distPaths.root));
 });
