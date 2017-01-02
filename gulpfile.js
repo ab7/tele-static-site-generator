@@ -233,7 +233,7 @@ gulp.task('dist-favicon', ['dist-clean'], function () {
     .pipe(gulp.dest(distPaths.root));
 });
 
-gulp.task('dist-fonts', ['build-clean'], function () {
+gulp.task('dist-fonts', ['dist-clean'], function () {
   return gulp.src(buildPaths.fonts +'*.{woff,woff2,ttf,eot,svg}')
     .pipe(gulp.dest(distPaths.fonts));
 });
