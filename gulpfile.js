@@ -88,10 +88,7 @@ function getPostData(cb) {
         cb(postData);
       });
     });
-
-
   });
-
 }
 
 function getNavLinks() {
@@ -104,17 +101,23 @@ function getNavLinks() {
     }
 
     files.forEach(function(file, index) {
-      navObj = {};
+      fileParts = file.split('.');
 
-      if (file === 'index.html') {
-        navLinks.push({title: 'Home', link: file});
-        return;
+      if (fileParts[1] !== undefined) {
+        if (fileParts[1] === 'html') {
+          navObj = {};
+
+          if (file === 'index.html') {
+            navLinks.splice(0, 0, {title: 'Home', link: file});
+            return;
+          }
+
+          navObj.title = toTitleCase(file.split('.')[0]);
+          navObj.link = file;
+
+          navLinks.push(navObj);
+        }
       }
-
-      navObj.title = toTitleCase(file.split('.')[0]);
-      navObj.link = file;
-
-      navLinks.push(navObj);
     });
   });
 
