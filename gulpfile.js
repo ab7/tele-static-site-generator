@@ -180,7 +180,7 @@ gulp.task('build-posts', ['build-clean'], function() {
     data.navLinks = getNavLinks();
     gulp.src(data.livePosts)
       .pipe(markdown())
-      .pipe(gap.prependText('{% extends "src/templates/base.html" %}{% block content %}'))
+      .pipe(gap.prependText('{% extends "src/templates/post.html" %}{% block post %}'))
       .pipe(gap.appendText('{% endblock %}'))
       .pipe(nunjucksRender({data: data}))
       .pipe(gulp.dest(buildPaths.root));
