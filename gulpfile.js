@@ -19,7 +19,6 @@ const gulp = require('gulp'),
         'pagesDir': 'src/pages/',
         'pages': 'src/pages/**/*.html',
         'postsDir': 'src/posts/',
-        'posts': 'src/posts/**/*.md',
         'assets': 'src/assets/',
         'sass': 'src/assets/scss/**/*.scss',
         'js': 'src/assets/js/**/*.js',
@@ -49,8 +48,10 @@ function getAssetFileNames() {
   }
 }
 
-function getPostData() {
-  var postData = [];
+function getPostData(cb) {
+  var postData = {};
+  postData.posts = [];
+  postData.livePosts = [];
 
   fs.readdir(srcPaths.postsDir , function(err, files) {
     if (err) {
@@ -64,23 +65,34 @@ function getPostData() {
           console.error(err);
           process.exit(1);
         }
-        var postText = content.substring(content.lastIndexOf('<!--//') + 1, content.lastIndexOf('//-->'));
+        var postText = content.substring(
+          content.lastIndexOf('<!--//') + 7,
+          content.lastIndexOf('//-->')
+        );
         var lines = postText.split('\n');
         var postObj = {};
         for (var i = 0; i < lines.length; i++) {
           if (lines[i]) {
             var data = lines[i].split(':');
-            postObj[data[0]] = data[1];
+            postObj[data[0].trim()] = data[1].trim();
           }
         }
-        filename = file.split('.')[0];
-        postObj.slug = filename + '.html';
-        postData.push(postObj);
+
+        if (postObj.live === 'true') {
+          filename = file.split('.')[0];
+          postObj.slug = filename + '.html';
+          postData.livePosts.push(srcPaths.postsDir + file);
+          postData.posts.push(postObj);
+
+        }
+
+        cb(postData);
       });
     });
+
+
   });
 
-  return postData;
 }
 
 function getNavLinks() {
@@ -134,7 +146,7 @@ gulp.task('build-sass', ['build-clean'], function () {
     .pipe(gulp.dest(buildPaths.assets))
 });
 
-gulp.task('build-js', ['build-clean', 'build-sass'], function () {
+gulp.task('build-js', ['build-clean'], function () {
   return gulp.src(srcPaths.js)
     .pipe(sourcemaps.init())
     .pipe(concat('main.js'))
@@ -142,7 +154,7 @@ gulp.task('build-js', ['build-clean', 'build-sass'], function () {
     .pipe(gulp.dest(buildPaths.assets))
 });
 
-gulp.task('build-images', ['build-clean', 'build-js'], function () {
+gulp.task('build-images', ['build-clean'], function () {
   return gulp.src(srcPaths.images +'*.{png,gif,jpg}')
     .pipe(gulp.dest(buildPaths.images));
 });
@@ -152,24 +164,25 @@ gulp.task('build-favicon', ['build-clean'], function () {
     .pipe(gulp.dest(buildPaths.root));
 });
 
-gulp.task('build-templates', ['build-clean', 'build-images', 'build-favicon'], function() {
-  var data = {};
-  data.navLinks = getNavLinks();
-  data.posts = getPostData();
-  return gulp.src(srcPaths.pages)
-    .pipe(nunjucksRender({data: data}))
-    .pipe(gulp.dest(buildPaths.root));
+gulp.task('build-templates', ['build-clean'], function() {
+  return getPostData(function(data) {
+    data.navLinks = getNavLinks();
+    gulp.src(srcPaths.pages)
+      .pipe(nunjucksRender({data: data}))
+      .pipe(gulp.dest(buildPaths.root));
+  });
 });
 
-gulp.task('build-posts', ['build-clean', 'build-images', 'build-favicon'], function() {
-  var data = {};
-  data.navLinks = getNavLinks();
-  return gulp.src(srcPaths.posts)
-    .pipe(markdown())
-    .pipe(gap.prependText('{% extends "src/templates/base.html" %}{% block content %}'))
-    .pipe(gap.appendText('{% endblock %}'))
-    .pipe(nunjucksRender({data: data}))
-    .pipe(gulp.dest(buildPaths.root));
+gulp.task('build-posts', ['build-clean'], function() {
+  return getPostData(function(data) {
+    data.navLinks = getNavLinks();
+    gulp.src(data.livePosts)
+      .pipe(markdown())
+      .pipe(gap.prependText('{% extends "src/templates/base.html" %}{% block content %}'))
+      .pipe(gap.appendText('{% endblock %}'))
+      .pipe(nunjucksRender({data: data}))
+      .pipe(gulp.dest(buildPaths.root));
+  });
 });
 
 //
@@ -230,6 +243,17 @@ gulp.task('watch', function() {
   gulp.watch(srcPaths.root + '**/*', ['build']);
 });
 
-gulp.task('build', ['build-templates', 'build-posts']);
+gulp.task('build', [
+  'build-templates',
+  'build-posts',
+  'build-favicon',
+  'build-images',
+  'build-js',
+  'build-sass'
+]);
 
-gulp.task('dist', ['dist-html', 'dist-favicon', 'dist-images']);
+gulp.task('dist', [
+  'dist-html',
+  'dist-favicon',
+  'dist-images'
+]);

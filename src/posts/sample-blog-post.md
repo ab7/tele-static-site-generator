@@ -3,6 +3,7 @@
 title: Sample Blog Post
 date: 2016-12-20
 image: sample-blog-post.png
+live: true
 
 //-->
 
