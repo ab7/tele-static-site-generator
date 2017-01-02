@@ -21,17 +21,21 @@ const gulp = require('gulp'),
         'assets': 'src/assets/',
         'sass': 'src/assets/scss/**/*.scss',
         'js': 'src/assets/js/**/*.js',
-        'images': 'src/assets/images/'
+        'images': 'src/assets/images/',
+        'fonts': 'src/assets/fonts/'
       },
       buildPaths = {
         'root': 'build/',
         'assets': 'build/assets/',
-        'images': 'build/assets/images/'
+        'images': 'build/assets/images/',
+        'fonts': 'build/assets/fonts/'
       },
       distPaths = {
         'root': 'dist/',
         'assets': 'dist/assets/',
-        'images': 'dist/assets/images'
+        'images': 'dist/assets/images',
+        'fonts': 'dist/assets/fonts/'
+
       };
 
 //
@@ -166,6 +170,11 @@ gulp.task('build-favicon', ['build-clean'], function () {
     .pipe(gulp.dest(buildPaths.root));
 });
 
+gulp.task('build-fonts', ['build-clean'], function () {
+  return gulp.src(srcPaths.fonts +'*.{woff,woff2,ttf,eot,svg}')
+    .pipe(gulp.dest(buildPaths.fonts));
+});
+
 gulp.task('build-templates', ['build-clean'], function() {
   return getPostData(function(data) {
     data.navLinks = getNavLinks();
@@ -224,6 +233,11 @@ gulp.task('dist-favicon', ['dist-clean'], function () {
     .pipe(gulp.dest(distPaths.root));
 });
 
+gulp.task('dist-fonts', ['build-clean'], function () {
+  return gulp.src(buildPaths.fonts +'*.{woff,woff2,ttf,eot,svg}')
+    .pipe(gulp.dest(distPaths.fonts));
+});
+
 gulp.task('dist-html', ['dist-clean', 'dist-css', 'dist-js'], function() {
   var options = {
     collapseWhitespace: true,
@@ -251,11 +265,13 @@ gulp.task('build', [
   'build-favicon',
   'build-images',
   'build-js',
-  'build-sass'
+  'build-sass',
+  'build-fonts'
 ]);
 
 gulp.task('dist', [
   'dist-html',
   'dist-favicon',
-  'dist-images'
+  'dist-images',
+  'dist-fonts'
 ]);
