@@ -17,7 +17,6 @@
     "url": "https://github.com/ab7/tele-static-site-generator/issues"
   },
   "devDependencies": {
-    "browser-sync": "^2.16.0",
     "gulp": "^3.9.1",
     "gulp-append-prepend": "^1.0.3",
     "gulp-clean": "^0.3.2",
