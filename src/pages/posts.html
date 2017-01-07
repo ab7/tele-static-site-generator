@@ -8,6 +8,7 @@
   {% for post in posts %}
     <li>
       <a href="{{post.slug}}">{{post.title}} | {{post.date}} | {{post.image}}</a>
+      <p>{{post.snippet}}</p>
     </li>
   {% endfor %}
 </ul>

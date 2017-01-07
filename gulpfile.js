@@ -68,25 +68,35 @@ function getPostData(cb) {
           console.error(err);
           process.exit(1);
         }
-        var postText = content.substring(
-          content.lastIndexOf('<!--//') + 7,
-          content.lastIndexOf('//-->')
-        );
-        var lines = postText.split('\n');
-        var postObj = {};
-        for (var i = 0; i < lines.length; i++) {
-          if (lines[i]) {
-            var data = lines[i].split(':');
+        var paramStartMarker = '<!--//',
+            paramEndMarker = '//-->',
+            snippetMarker = '<!-- snippet -->';
+
+        var paramsStart = content.lastIndexOf(paramStartMarker),
+            paramsEnd = content.lastIndexOf(paramEndMarker),
+            params = content.substring(paramsStart + paramStartMarker.length, paramsEnd),
+            paramLines = params.split('\n'),
+            postObj = {};
+
+        for (var i = 0; i < paramLines.length; i++) {
+          if (paramLines[i]) {
+            var data = paramLines[i].split(':');
             postObj[data[0].trim()] = data[1].trim();
           }
         }
 
         if (postObj.live === 'true') {
-          filename = file.split('.')[0];
+          var filename = file.split('.')[0],
+              snippetStart = content.lastIndexOf(snippetMarker);
           postObj.slug = filename + '.html';
+          var snippet = content.substring(
+            snippetStart + snippetMarker.length,
+            content.length
+          ).split('\n');
+
+          postObj.snippet = snippet[0].split(' ').slice(0, 40).join(' ');
           postData.livePosts.push(srcPaths.postsDir + file);
           postData.posts.push(postObj);
-
         }
 
         cb(postData);
