@@ -12,6 +12,7 @@ const gulp = require('gulp'),
       htmlmin = require('gulp-htmlmin'),
       cleanCSS = require('gulp-clean-css'),
       replace = require('gulp-replace'),
+      sitemap = require('gulp-sitemap'),
       srcPaths  = {
         'root': 'src/',
         'templates': 'src/templates/**/*.html',
@@ -258,8 +259,14 @@ gulp.task('dist-html', ['dist-clean', 'dist-css', 'dist-js'], function() {
     .pipe(replace('main.js', assets.jsFile))
     .pipe(replace('main.css', assets.cssFile))
     .pipe(htmlmin(options))
+    .pipe(gulp.dest(distPaths.root))
+    .pipe(sitemap({
+      siteUrl: 'https://www.example.com'
+    }))
     .pipe(gulp.dest(distPaths.root));
 });
+
+
 
 //
 // Main tasks
